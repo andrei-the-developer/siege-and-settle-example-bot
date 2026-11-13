@@ -98,6 +98,15 @@ class ChooseBuild(unittest.TestCase):
         b = choose_build(village(production=[10, 10, 10, 3]), rules, goals)
         self.assertEqual((b.gid, b.reason), (4, "crop surplus is low"))
 
+    def test_queued_jobs_eat_crop_too(self):
+        # 10 crop an hour, but two queued jobs of 4 each leave 2: a building of 4 more would be refused (not_enough_crop)
+        rules = Rules({"limits": {"field_slots": 4}, "buildings": [
+            dict(b, levels=[dict(lv, pop=4) for lv in b["levels"]]) for b in RULES.buildings.values()]})
+        jobs = [{"Slot": 1, "Gid": 1, "Level": 3}, {"Slot": 3, "Gid": 3, "Level": 3}]
+        goals = [{"kind": "building", "gid": MAIN_BUILDING, "level": 4}]
+        b = choose_build(village(production=[10, 10, 10, 10], jobs=jobs), rules, goals, max_queue=3)
+        self.assertEqual((b.gid, b.reason), (4, "crop surplus is low"))
+
     def test_tutorial_goal_first_and_not_twice(self):
         goals = [{"kind": "building", "gid": MAIN_BUILDING, "level": 4}]
         b = choose_build(village(), RULES, goals)

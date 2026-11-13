@@ -302,6 +302,10 @@ def choose_build(village: dict, rules: Rules, goals: Optional[list] = None, max_
     candidates: list = []
 
     production = village.get("production", [0, 0, 0, 0])
+    # The game refuses a building (not every crop field) when the crop left after the population of the village, of
+    # every queued job and of the new level is 1 or less: the queued jobs eat crop too, before they are built.
+    queued_upkeep = sum(rules.upkeep(job_field(j, "gid") or 0, job_field(j, "level") or 0) for j in village.get("jobs", []))
+    free_crop = production[CROP] - queued_upkeep
     fields = sorted(
         (level, slot, gid)
         for slot, (gid, level) in planned.items()
@@ -309,7 +313,7 @@ def choose_build(village: dict, rules: Rules, goals: Optional[list] = None, max_
     )
 
     # 1. Food: every building and troop eats crop; below a small surplus, a crop field comes first.
-    if production[CROP] < 5:
+    if free_crop < 5:
         crop_fields = [f for f in fields if f[2] == CROPLAND]
         if crop_fields:
             level, slot, gid = crop_fields[0]
@@ -347,7 +351,7 @@ def choose_build(village: dict, rules: Rules, goals: Optional[list] = None, max_
     for c in candidates:
         if not c or not affordable(rules.cost(c.gid, c.level), resources):
             continue
-        if c.gid != CROPLAND and rules.upkeep(c.gid, c.level) > production[CROP]:
+        if c.gid != CROPLAND and free_crop - rules.upkeep(c.gid, c.level) <= 1:
             continue  # the game refuses it (not_enough_crop): a crop field has to come first
         return c
     return None

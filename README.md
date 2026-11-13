@@ -115,7 +115,7 @@ Then every turn:
 3. **Builds**, in each village, while the build queue holds fewer than `GAME_MAX_QUEUE` jobs (when a store is 90%
    full it fills the game's queue instead, since paying now beats losing the production). The first of these that the
    village can pay for, and whose crop upkeep the village can feed:
-   - a crop field when the crop surplus is small (every building and troop eats crop);
+   - a crop field when the crop surplus is small (every building and troop eats crop, and so do the queued jobs);
    - the next building the tutorial asks for (never one already queued);
    - the warehouse or the granary when it is 80% full;
    - the lowest resource field, of the resource the village has least of;
