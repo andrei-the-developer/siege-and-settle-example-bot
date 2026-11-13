@@ -1,0 +1,9 @@
+# your settings and key: never commit them
+.env
+*.key
+# Python
+__pycache__/
+*.pyc
+.venv/
+# logs of your runs
+*.log
